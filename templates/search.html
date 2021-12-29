@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Search</title>
+    </head>
+    <body>
+        <h1>Search for a term</h1>
+        <input type="text" id="search" placeholder="Search for a term">
+        <p id="autosuggest"></p>
+        <h2>Results</h2>
+        <p id="results"></p>
+
+        <script>
+            var search = document.getElementById('search');
+            search.addEventListener('keyup', function(e) {
+                // run query if space key is pressed
+                if (e.keyCode === 32) {
+                    var term = search.value;
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '/?query=' + term);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            var results = document.getElementById('results');
+                            as_json = JSON.parse(xhr.responseText);
+
+                            var all_results = "";
+
+                            console.log(as_json)
+
+                            for (var i = 0; i < as_json["results"].length; i++) {
+                                result_item = `<li>
+                                    <p>${as_json["results"][i]["domain"]}</p>
+                                    <a href="${as_json["results"][i]["url"]}">${as_json["results"][i]["title"]}</a>
+                                    <p>${as_json["results"][i]["meta_description"]}</p>
+                                </li>`;
+
+                                all_results += result_item;
+                            }
+
+                            results.innerHTML = all_results;
+                        }
+                    }
+                    xhr.send()
+                    console.log("te")
+                    var new_xhr = new XMLHttpRequest();
+                    new_xhr.open('GET', '/autocomplete?query=' + term);
+                    new_xhr.onreadystatechange = function() {
+                        if (new_xhr.readyState == 4 && new_xhr.status == 200) {
+                            var autosuggest = document.getElementById('autosuggest');
+                            as_json = JSON.parse(new_xhr.responseText);
+
+                            var all_results = "";
+
+                            console.log(as_json)
+
+                            for (var i = 0; i < as_json["results"].length; i++) {
+                                result_item = `<li>${as_json["results"][i]}</li>`;
+
+                                all_results += result_item;
+                            }
+
+                            autosuggest.innerHTML = all_results;
+                        }
+                    }
+                    new_xhr.send();
+                }
+            });
+        </script>
+    </body>
+</html>
